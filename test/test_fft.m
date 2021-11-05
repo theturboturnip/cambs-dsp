@@ -41,8 +41,14 @@ P1(2:end-1) = 2*P1(2:end-1);
 #w2 = 2*pi*f2
 #area2 = (t_per_block/2 - sin(2*t_per_block*w2)/(4*w2)) - 0
 
-plot(Y_freqs,P1)
+b=[1 1 1 1]/4;
+a=[1];
+smoothed = filter(b, a, P1);
 
-
+plot(P1)
+hold on;
+plot(smoothed)
+legend("fft", "smoothed")
+hold off;
 # peak 23kHz = 0.75 peak 25kHz = 1
 
