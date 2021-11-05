@@ -111,7 +111,7 @@ plot(newcases.date, y)
 title("1.b.iii) Backwards Difference");
 
 
-%% 1.c
+%% 1.c.i
 % Generate a one second long Gaussian noise sequence r with a sampling rate
 % of 300Hz
 f_s = 300;
@@ -184,3 +184,79 @@ hold off;
 
 %% 
 % TODO Compare x, y, z, u
+
+%% 1.c.ii
+% TODO Why should the first filter have a lower cut-off frequency than the second?
+% 
+
+%% 1.d.i
+% Simulate the reconstruction of a sampled band-pass signal
+
+%%
+% Generate a 1 s noise sequence r, as in part (c)(i ), but this time use
+% a sampling frequency of 3 kHz. Set the first and last 500 samples to
+% zero.
+f_s = 3000;
+t = 1; % 1 second long
+N = f_s * t;
+ts = linspace(0, t, N);
+r = randn(N,1);
+r(1:500) = 0;
+r(end-500:end) = 0;
+
+%%
+% Apply a band-pass filter that attenuates frequencies outside 31-44Hz
+f1 = 31;
+f2 = 44;
+% 3 = 3rd order filter
+% 30 = -30dB for frequencies outside the range
+[b, a] = cheby2(3, 30, [f1 f2]/(f_s/2));
+% Apply the filter
+x = filtfilt(b, a, r);
+
+%%
+% Sample the resulting signal at 30Hz, set all but every 100th value to 0
+y = x;
+for i = 1:99
+    y(i:100:end) = 0;
+end
+
+%%
+% Reconstruct y with sinc interpolation (see 1.c.i for working)
+% Change the scaling factor to 1/100 instead of 1/3
+z = zeros(N,1);
+figure;
+stem(y)
+hold on;
+for i_y = 1:N
+    data = y(i_y) * sinc((ts/t - i_y/N) * f_s/100);
+    plot(data);
+    z = z + data';
+end
+hold off;
+
+%%
+% Generate another band-pass filter for 30-45Hz, apply to y to reconstruct
+% as u
+f1 = 30;
+f2 = 45;
+% 3 = 3rd order filter
+% 30 = -30dB for frequencies outside the range
+[b, a] = cheby2(3, 30, [f1 f2]/(f_s/2));
+% Apply it to y, resulting in interpolated sequence u.
+% multiply by 100 to compensate for energy lost during sampling.
+u = 100 * filtfilt(b, a, y);
+
+%%
+% Plot x, y, z, and u on top of each other in one figure
+figure;
+plot(x);
+hold on;
+stem(y);
+plot(z);
+plot(u);
+hold off;
+
+%% 1.d.ii
+% TODO Why does the reconstructed waveform differ much more from the original
+% if you reduce the cut-off frequencies of all band-pass filters by 5 Hz?

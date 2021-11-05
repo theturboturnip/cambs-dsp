@@ -111,7 +111,7 @@ plot(newcases.date, y)
 title("1.b.iii) Backwards Difference");
 
 
-%% 1.c
+%% 1.c.i
 % Generate a one second long Gaussian noise sequence r with a sampling rate
 % of 300Hz
 f_s = 300;
@@ -146,37 +146,32 @@ y(2:3:end) = 0;
 %
 % $$x(t) = \sum_{n=-\infty}^{\infty} x_n * sinc(t/t_s - n)$$
 %
-% Translate into more MATLAB-like terms: $$z = \sum_{i_y=1}^{N} y(i_y) * sinc(ts/t - i_y/N)
+% MATLAB version:
+% $$z = \sum_{i_y=1}^{N} y(i_y) * sinc((ts/t - i_y/N) * f_s/3)$$
+%
+% Translate the sinc by i_y/N to align it with the sample,
+% and scale it by f_s over 3 to align the zero crossings with the other
+% sample points
 z = zeros(N,1);
 figure;
 stem(y)
 hold on;
 for i_y = 1:N
-    
-    data = y(i_y) * sinc((ts/t - i_y/N) * f_s/2);
+    data = y(i_y) * sinc((ts/t - i_y/N) * f_s/3);
     plot(data);
     z = z + data';
 end
 hold off;
-%for i_z = 1:N
-%    % Time of sample i_z
-%    t_z = i_z * t / N;
-%
-%    val = 0;
-%    for i_y = 1:N
-%        t_y = i_y * t / N;
-%        s = sinc(t_z/t - i_y);
-%        val = val + (y(i_y) * s);
-%    end
-%   
-%    z(i_z) = val;
-%end
 
 %%
 % Generate another low-pass filter with fir1, cut-off frequency 50Hz
 f_c = 50; % cutoff frequency
 a = [1]; % FIR has no y-terms
 b = fir1(50, f_c/(f_s/2));
+% Apply it to y, resulting in interpolated sequence u.
+% multiply by 3 to compensate for energy lost during sampling.
+u = 3 * filtfilt(b, a, y);
+
 
 %%
 % Plot x, y, z, and u on top of each other in one figure 
@@ -184,5 +179,69 @@ plot(x);
 hold on;
 stem(y);
 plot(z);
-%plot(u);
+plot(u);
 hold off;
+
+%% 
+% TODO Compare x, y, z, u
+
+%% 1.c.ii
+% TODO Why should the first filter have a lower cut-off frequency than the second?
+% 
+
+%% 1.d.i
+% Simulate the reconstruction of a sampled band-pass signal
+
+%%
+% Generate a 1 s noise sequence r, as in part (c)(i ), but this time use
+% a sampling frequency of 3 kHz. Set the first and last 500 samples to
+% zero.
+f_s = 3000;
+t = 1; % 1 second long
+N = f_s * t;
+ts = linspace(0, t, N);
+r = randn(N,1);
+r(1:500) = 0;
+r(end-500:end) = 0;
+
+%%
+% Apply a band-pass filter that attenuates frequencies outside 31-44Hz
+f1 = 31;
+f2 = 44;
+% 3 = 3rd order filter
+% 30 = -30dB for frequencies outside the range
+[b, a] = cheby2(3, 30, [f1 f2]/(f_s/2));
+% Apply the filter
+x = filtfilt(b, a, r);
+
+%%
+% Sample the resulting signal at 30Hz, set all but every 100th value to 0
+y = x;
+for i = 1:99
+    y(i:100:end) = 0;
+end
+
+%%
+% Reconstruct y with sinc interpolation (see 1.c.i for working)
+z = zeros(N,1);
+figure;
+stem(y)
+hold on;
+for i_y = 1:N
+    data = y(i_y) * sinc((ts/t - i_y/N) * f_s/3);
+    plot(data);
+    z = z + data';
+end
+hold off;
+
+%%
+% Generate another band-pass filter for 30-45Hz, apply to y to reconstruct
+% as u
+f1 = 30;
+f2 = 45;
+% 3 = 3rd order filter
+% 30 = -30dB for frequencies outside the range
+[b, a] = cheby2(3, 30, [f1 f2]/(f_s/2));
+% Apply it to y, resulting in interpolated sequence u.
+% multiply by 3 to compensate for energy lost during sampling.
+u = 3 * filtfilt(b, a, y);
