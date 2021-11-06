@@ -104,7 +104,7 @@ hold off;
 
 %% 
 % x and u are similar, but not equal.
-% TODO - is this to do with aliasing introduced by sampling?
+% I think this is because the low-pass filter isn't perfect.
 figure;
 plot(x);
 hold on;
@@ -115,6 +115,18 @@ legend("x", "y", "u");
 xlim([100 150]);
 title("1.c.i) x vs. u (low-pass filtered sampled x)");
 hold off;
+
+%%
+% Frequency response of the second low-pass filter.
+% The magnitude at the original cutoff (45Hz) is -3dB, so higher
+% frequencies in x were be unfairly reduced when generating u.
+f_c = 50;
+a = [1];
+b = fir1(50, f_c/(f_s/2));
+figure;
+freqz(b,a,2048,f_s);
+xlim([0, 50]);
+xline(45);
 
 
 %% 1.c.ii)
