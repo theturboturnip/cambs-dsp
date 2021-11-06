@@ -1,4 +1,4 @@
-.PHONY: all
+.PHONY: all html-pdf
 all: html-pdf
 
 clean:
@@ -20,17 +20,17 @@ clean:
 	(cd ./build/ && matlab -batch "publish('./ex_complete.m', 'html'); exit")
 	@echo "...done!"
 
-matlab-pdf: ./build/ex_complete.m
+matlab-pdf: ./ex_complete_matlab.pdf
+./ex_complete_matlab.pdf: ./build/ex_complete.m
 	@echo "Building PDF from MATLAB..."
 	(cd ./build/ && matlab -batch "publish('./ex_complete.m', 'pdf'); exit")
 	@echo "...done!"
-	cp ./build/html/ex_complete.pdf ./ex_complete.pdf
+	cp ./build/html/ex_complete.pdf ./ex_complete_matlab.pdf
 
-latex-pdf: ./build/html/ex_complete.tex
+latex-pdf: ./ex_complete_latex.pdf
+./ex_complete_latex.pdf: ./build/html/ex_complete.tex
 	(cd ./build/html/ && pdflatex ./ex_complete.tex)
-	cp ./build/html/ex_complete.pdf ./ex_complete.pdf
+	cp ./build/html/ex_complete.pdf ./ex_complete_latex.pdf
 
 html-pdf: ./build/html/ex_complete.html
-	(cd ./build/html/ && pandoc ./ex_complete.html -t html -o ./ex_complete.pdf)
-	cp ./build/html/ex_complete.pdf ./ex_complete.pdf
-
+	(cd ./build/html/ && google-chrome-stable --new-window --print-to-pdf ./ex_complete.html)
