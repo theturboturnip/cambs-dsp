@@ -1,4 +1,4 @@
-%% 1.c)
+%% 1.c
 % Generate a one second long Gaussian noise sequence r with a sampling rate
 % of 300Hz
 f_s = 300;
@@ -26,6 +26,7 @@ hold on;
 plot(r);
 plot(x);
 legend("r","x");
+title("1.c) Raw noise $r$ vs band-pass filtered $x$");
 hold off;
 
 %%
@@ -41,6 +42,7 @@ figure;
 plot(x);
 hold on;
 stem(y);
+title("1.c) x sampled at 30Hz");
 hold off;
 
 %%
@@ -65,7 +67,7 @@ for i_y = 1:N
 end
 stem(y)
 hold off;
-title("1.c Per-sample sinc functions")
+title("1.c) Per-sample sinc functions")
 
 %%
 % Generate another low-pass filter with fir1, cut-off frequency 50Hz
@@ -89,7 +91,7 @@ legend("x", "y", "z", "u");
 title("1.c.i) x, y, z, and u")
 hold off;
 
-%% 
+%% 1.c.i) x vs z
 % x and z are equal
 figure;
 plot(x);
@@ -99,10 +101,10 @@ plot(z);
 
 legend("x", "y", "z");
 xlim([100 150]);
-title("1.c.i) x vs. z (sinc-interpolated sampled x)");
+title("1.c.i) x vs. z", "(sinc-interpolated sampled x)");
 hold off;
 
-%% 
+%% 1.c.i) x vs u
 % x and u are similar, but not equal.
 % I think this is because the low-pass filter isn't perfect.
 figure;
@@ -113,7 +115,7 @@ plot(u);
 
 legend("x", "y", "u");
 xlim([100 150]);
-title("1.c.i) x vs. u (low-pass filtered sampled x)");
+title("1.c.i) x vs. u", "(low-pass filtered sampled x)");
 hold off;
 
 %%
@@ -127,6 +129,7 @@ figure;
 freqz(b,a,2048,f_s);
 xlim([0, 50]);
 xline(45);
+title("1.c.i) u low-pass filter frequency response");
 
 
 %% 1.c.ii)
@@ -135,3 +138,4 @@ xline(45);
 % If the second low-pass filter had a lower cut-off frequency than the
 % first filter, it would discard higher-frequency information and
 % not reconstruct it.
+

@@ -1,4 +1,4 @@
-%% 1.d)
+%% 1.d
 % Simulate the reconstruction of a sampled band-pass signal
 
 %%
@@ -31,6 +31,7 @@ hold on;
 plot(r);
 plot(x);
 legend("r","x");
+title("1.d) Raw noise $r$ vs band-pass filtered $x$");
 hold off;
 
 %%
@@ -44,6 +45,7 @@ figure;
 plot(x);
 hold on;
 stem(y);
+title("1.d) x sampled at 30Hz");
 hold off;
 
 %%
@@ -60,7 +62,7 @@ for i_y = 1:N
     z = z + data';
 end
 hold off;
-title("1.d Per-sample sinc functions")
+title("1.d) Per-sample sinc functions")
 
 %%
 % Generate another band-pass filter for 30-45Hz, apply to y to reconstruct
@@ -96,7 +98,7 @@ plot(z);
 
 legend("x", "y", "z");
 xlim([1000 1500]);
-title("1.d.i) x vs. z (sinc-interpolated sampled x)");
+title("1.d.i) x vs. z", "(sinc-interpolated sampled x)");
 hold off;
 
 %% 1.d.i) x vs u
@@ -110,7 +112,7 @@ plot(u);
 
 legend("x", "y", "u");
 xlim([1000 1500]);
-title("1.d.i) x vs. u (30-45Hz band-pass filtered sampled x)");
+title("1.d.i) x vs. u", "(30-45Hz band-pass filtered sampled x)");
 hold off;
 
 %%
@@ -126,6 +128,7 @@ freqz(b,a,2048,f_s);
 xlim([20, 50]);
 xline(31);
 xline(44);
+title("1.d.i) u band-pass filter frequency response");
 
 
 %% 1.d.ii)
@@ -176,7 +179,7 @@ hold on;
 stem(y_prime_30);
 plot(u_prime_30);
 legend("x'", "y' @ 30Hz", "u' from y' @ 30Hz");
-title("1.d.ii) x' vs. u'\\(band-pass frequencies reduced by 5Hz, sampled @ 30Hz)");
+title("1.d.ii) x' vs. u'","(band-pass frequencies reduced by 5Hz, sampled @ 30Hz)");
 hold off;
 
 figure;
@@ -185,5 +188,5 @@ hold on;
 stem(y_prime_25);
 plot(u_prime_25);
 legend("x'", "y' @ 25Hz", "u' from y' @ 25Hz");
-title("1.d.ii) x' vs. u'\\(band-pass frequencies reduced by 5Hz, sampled @ 25Hz)");
+title("1.d.ii) x' vs. u'","(band-pass frequencies reduced by 5Hz, sampled @ 25Hz)");
 hold off;

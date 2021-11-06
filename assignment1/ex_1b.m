@@ -7,13 +7,13 @@ newcases = sortrows(newcases, 1);
 % Take x = newcases.newCasesByPublishDate
 x = newcases.newCasesByPublishDate;
 
-%% 1.b - 7 Point Moving Average
+%% 1.b) 7 Point Moving Average
 a=[1];
 b=[1 1 1 1 1 1 1]/7;
 y = filter(b, a, x);
 figure;
 plot(newcases.date, y)
-title("1.b Covid Data - 7-point moving average");
+title("1.b) 7-point moving average");
 
 %% 1.b.i) Exponential Averaging System
 % $y_n = alpha * x_n + (1 - alpha)*y_{n-1}$

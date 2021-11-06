@@ -11,7 +11,7 @@ y = filter(b, a, x);
 figure;
 plot(n, x, 'bx-', n, y, 'ro-');
 ylim([-7,7]);
-title("Example - 4-point moving average");
+title("1.a) 4-point moving average");
 
 
 %% 1.a.i) Exponential Averaging System
