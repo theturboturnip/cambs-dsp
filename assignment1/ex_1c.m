@@ -6,27 +6,26 @@ t = 1; % 1 second long
 N = f_s * t;
 ts = linspace(1/f_s, t, N);
 r = randn(N,1);
-% Taper $r$ by setting its first and last 15 samples to zero.
+% Taper r by setting its first and last 15 samples to zero.
 r(1:15) = 0;
 r(end-15:end) = 0;
 
 %%
 % Make a Finite-Impulse Response low-pass filter with cut-off frequency
+% 45Hz.
+% Use the filtfilt function in order to apply that filter to the
+% generated noise signal, resulting in the filtered noise signal x
 f_c = 45; % cutoff frequency
 a = [1]; % FIR has no y-terms
 b = fir1(50, f_c/(f_s/2));
-% Use the filtfilt function in order to apply that filter to the
-% generated noise signal, resulting in the filtered noise signal x
 x = filtfilt(b, a, r);
 
-%%
-% Plot r, x together.
 figure;
 hold on;
 plot(r);
 plot(x);
 legend("r","x");
-title("1.c) Raw noise $r$ vs band-pass filtered $x$");
+title("1.c) Raw noise r vs low-pass filtered x");
 hold off;
 
 %%
@@ -35,7 +34,7 @@ y = x;
 % element 1, 4, 7... = 0
 y(1:3:end) = 0;
 % element 2, 5, 8... = 0
-y(3:3:end) = 0;
+y(2:3:end) = 0;
 % element 3, 6, 9... = unchanged
 
 figure;
@@ -46,7 +45,8 @@ title("1.c) x sampled at 30Hz");
 hold off;
 
 %%
-% Implement sinc interpolation to reconstruct the zeroed samples of y
+% Implement sinc interpolation to reconstruct the zeroed samples of y.
+% From slide 70:
 %
 % $$x(t) = \sum_{n=-\infty}^{\infty} x_n * sinc(t/t_s - n)$$
 %
@@ -54,8 +54,8 @@ hold off;
 %
 % $$z = \sum_{i_y=1}^{N} y(i_y) * sinc((ts/t - i_y/N) * f_s/3)$$
 %
-% Translate the sinc by $i_y/N$ to align it with the sample,
-% and scale it by $f_s$ over 3 to align the zero crossings with the other
+% Translate each sinc by $i_y/N$ to align it with the sample,
+% and scale them by $f_s$ over 3 to align the zero crossings with the other
 % sample points.
 z = zeros(N,1);
 figure;
@@ -70,12 +70,12 @@ hold off;
 title("1.c) Per-sample sinc functions")
 
 %%
-% Generate another low-pass filter with fir1, cut-off frequency 50Hz
+% Generate another low-pass filter with fir1, cut-off frequency 50Hz.
+% Apply it to y, resulting in interpolated sequence u.
+% Multiply by 3 to compensate for energy lost during sampling.
 f_c = 50; % cutoff frequency
 a = [1]; % FIR has no y-terms
 b = fir1(50, f_c/(f_s/2));
-% Apply it to y, resulting in interpolated sequence u.
-% multiply by 3 to compensate for energy lost during sampling.
 u = 3 * filtfilt(b, a, y);
 
 
@@ -120,8 +120,8 @@ hold off;
 
 %%
 % Frequency response of the second low-pass filter.
-% The magnitude at the original cutoff (45Hz) is -3dB, so higher
-% frequencies in x were be unfairly reduced when generating u.
+% The magnitude at the original cutoff (45Hz) is -1dB, so higher
+% frequencies in x were unfairly reduced when generating u.
 f_c = 50;
 a = [1];
 b = fir1(50, f_c/(f_s/2));

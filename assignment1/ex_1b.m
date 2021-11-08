@@ -1,5 +1,5 @@
 %% 1.b
-% Get table date, taking only the 'date' and 'newCasesByPublishDate'
+% Get table data, taking only the 'date' and 'newCasesByPublishDate'
 % columns
 newcases = readtable("covid_new_cases_2021_11_04.csv", 'Range', 'D:E');
 % Sort table by 'date'

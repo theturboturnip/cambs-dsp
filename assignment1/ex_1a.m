@@ -5,6 +5,7 @@ x = [ 0 0 0 -4 0 0 0 0 0 0 2 2 2 2 ...
 -3 3 -3 3 -3 3 -3 3 -3 0 0 0 0 0 0 ];
 n = 0:length(x)-1;
 
+%% 1.a) 4 Point Moving Average
 a=[1];
 b=[1 1 1 1]/4;
 y = filter(b, a, x);

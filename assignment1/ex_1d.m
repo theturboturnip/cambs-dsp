@@ -2,7 +2,7 @@
 % Simulate the reconstruction of a sampled band-pass signal
 
 %%
-% Generate a 1 s noise sequence r, as in part (c)(i ), but this time use
+% Generate a 1 s noise sequence r, as in part (c)(i), but this time use
 % a sampling frequency of 3 kHz. Set the first and last 500 samples to
 % zero.
 f_s = 3000;
@@ -14,7 +14,9 @@ r(1:500) = 0;
 r(end-500:end) = 0;
 
 %%
-% Apply a band-pass filter that attenuates frequencies outside 31-44Hz
+% Apply a band-pass filter that attenuates frequencies outside 31-44Hz.
+% r is high frequency, so this will remove a significant portion and x will
+% have a much lower amplitude.
 f1 = 31;
 f2 = 44;
 % 3 = 3rd order filter
@@ -23,15 +25,12 @@ f2 = 44;
 % Apply the filter
 x = filtfilt(b, a, r);
 
-%%
-% Plot r, x together. r is very high frequency, so the band-pass will
-% remove a lot and x will have a much lower amplitiude
 figure;
 hold on;
 plot(r);
 plot(x);
 legend("r","x");
-title("1.d) Raw noise $r$ vs band-pass filtered $x$");
+title("1.d) Raw noise r vs band-pass filtered x");
 hold off;
 
 %%
@@ -147,6 +146,8 @@ title("1.d.i) u band-pass filter frequency response");
 % there wasn't a problem.
 % With the decreased frequencies we can also resolve the problem by
 % decreasing f_y to 25Hz, and the final figure shows this fixes the issue.
+%
+% (Sinc interpolation fails in both cases, as outlined previously.)
 
 % Find x' = x but frequencies reduced by 5
 f1 = 31-5;
