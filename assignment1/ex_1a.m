@@ -1,3 +1,8 @@
+%% DSP Assignment 1 
+% Samuel Stark <sws35>
+%
+% November 2021
+
 %% 1.a
 x = [ 0 0 0 -4 0 0 0 0 0 0 2 2 2 2 ...
 2 0 -3 -3 -3 0 0 0 0 0 1 -4 0 4 ...
