@@ -59,13 +59,21 @@ z_filtered = filter(b_200, a_200, z_shifted);
 %%
 % Display spectrograms
 %
-% TODO How does the displated frequency relate to the radio frequency
+% TODO How does the displayed frequency relate to the radio frequency
 figure;
 spectrogram(z,'yaxis');
-title("original signal");
-yline(([F2 F3] - Fbase)/(Fs/2), 'r');
-text(8E6, (F2 - Fbase)/(Fs/2), "97.2MHz", 'VerticalAlignment', 'bottom', 'FontWeight', 'bold');
-text(8E6, (F3 - Fbase)/(Fs/2), "98.5MHz", 'VerticalAlignment', 'bottom', 'FontWeight', 'bold');
+title("original signal, centred on 97MHz");
+% 96MHz < 97MHz, so it's in the "negative frequency" range and have to wrap
+% around
+yline((2+(F1 - Fbase)/(Fs/2)), '', "96MHz",'FontWeight', 'bold');
+% F2 and F3 > 97 => they're in the positive frequency range
+yline(([F2 F3] - Fbase)/(Fs/2), '', ["97.2MHz", "98.5MHz"],'FontWeight', 'bold');
+% Show the split between +ve, -ve frequencies
+yline(1, '--', 'Negative-Positive Frequency Cutoff', 'LabelHorizontalAlignment', 'left', 'LineWidth', 2);
+% Annotate frequency lines
+% text(8E6, (2+(F1 - Fbase)/(Fs/2)), "96MHz", 'VerticalAlignment', 'bottom', 'FontWeight', 'bold');
+% text(8E6, (F2 - Fbase)/(Fs/2), "97.2MHz", 'VerticalAlignment', 'bottom', 'FontWeight', 'bold');
+% text(8E6, (F3 - Fbase)/(Fs/2), "98.5MHz", 'VerticalAlignment', 'bottom', 'FontWeight', 'bold');
 
 figure;
 spectrogram(z_shifted,'yaxis');
@@ -119,11 +127,14 @@ audiowrite('ex_3b_ii_3.wav', s_normal, 48000);
 %% Functions
 
 function s = fm_demodulate(Fs, z)
-%     dt = 1/Fs;
-%     s = angle(z(2:end)./z(1:(end-1)))/dt;
     dt = 1/Fs;
-    dz = z(2:end) - z(1:(end-1));
-    s = ((dz/dt)./z(2:end))/(2i*pi*1);
+    s = angle(z(2:end)./z(1:(end-1)))/dt;
+
+%     dt = 1/Fs;
+%     dz = z(2:end) - z(1:(end-1));
+%     z_short = z(1:(end-1));
+%     s = imag((dz/dt).*conj(z_short))./(abs(z_short).^2);
+%     s = ((dz/dt)./z(2:end))/(2i*pi*1);
 end
 
 function z_prime=shift_freq(z, f, Fs)
