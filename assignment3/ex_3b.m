@@ -16,7 +16,7 @@ plot(s)
 %%
 % Low-pass filter
 F_low = 16000;
-[b_16,a_16] = butter(10, (F_low/(Fs/2)), 'low');
+[b_16,a_16] = butter(7, (F_low/(Fs/2)), 'low');
 h = fvtool(b_16, a_16);
 s_filtered = filter(b_16, a_16, s);
 
@@ -50,11 +50,19 @@ z_shifted = shift_freq(z, F1 - Fbase, Fs);
 
 
 %% 
-% Apply a 200kHz low-pass
+% Apply a low-pass filter. 
 F_low = 200E3;
-[b_200,a_200] = butter(10, (F_low/(Fs/2)), 'low');
-%h = fvtool(b, a);
+[b_200,a_200] = butter(5, (F_low/(Fs/2)), 'low');
+figure;
+h = fvtool(b_200, a_200);
 z_filtered = filter(b_200, a_200, z_shifted);
+
+% Also, prepare a 19kHz notch filter - each signal has a 19kHz spike
+[b_n, a_n] = iirnotch(19000/24000, (19/24)/35);
+
+% Reset the 16kHz low-pass filter to be useful under 3.6MHz
+[b_16,a_16] = butter(3, (16000/(Fs/2)), 'low');
+
 
 %%
 % Display spectrograms
@@ -65,15 +73,12 @@ spectrogram(z,'yaxis');
 title("original signal, centred on 97MHz");
 % 96MHz < 97MHz, so it's in the "negative frequency" range and have to wrap
 % around
-yline((2+(F1 - Fbase)/(Fs/2)), '', "96MHz",'FontWeight', 'bold');
+yline((2+(F1 - Fbase)/(Fs/2)), '', "96MHz (\Delta = -1MHz)",'FontWeight', 'bold');
 % F2 and F3 > 97 => they're in the positive frequency range
-yline(([F2 F3] - Fbase)/(Fs/2), '', ["97.2MHz", "98.5MHz"],'FontWeight', 'bold');
+yline(([F2 F3] - Fbase)/(Fs/2), '', ["97.2MHz (\Delta = 0.2MHz)", "98.5MHz (\Delta = 1.5MHz)"],'FontWeight', 'bold');
 % Show the split between +ve, -ve frequencies
 yline(1, '--', 'Negative-Positive Frequency Cutoff', 'LabelHorizontalAlignment', 'left', 'LineWidth', 2);
-% Annotate frequency lines
-% text(8E6, (2+(F1 - Fbase)/(Fs/2)), "96MHz", 'VerticalAlignment', 'bottom', 'FontWeight', 'bold');
-% text(8E6, (F2 - Fbase)/(Fs/2), "97.2MHz", 'VerticalAlignment', 'bottom', 'FontWeight', 'bold');
-% text(8E6, (F3 - Fbase)/(Fs/2), "98.5MHz", 'VerticalAlignment', 'bottom', 'FontWeight', 'bold');
+
 
 figure;
 spectrogram(z_shifted,'yaxis');
@@ -85,10 +90,14 @@ title("signal shifted by 1MHz, low-pass filtered");
 %%
 % demodulate, low-pass filter, subsample, output as wav
 s = fm_demodulate(Fs, z_filtered);
-s_filtered = filter(b_16, a_16, s);
 % Reduce from 3.6MHz to 48kHz (every 75th)
+s_filtered = filter(b_16, a_16, s);
+% Remove 19kHz spike
+s_reduced = filter(b_n, a_n, s_reduced);
 s_reduced = s_filtered(1:75:end);
 s_normal = normalize(s_reduced, 'range', [-1 1]);
+% s_normal = filter(b_n, a_n, s_normal);
+% fft_plot(s_normal, 48000);
 audiowrite('ex_3b_ii_1.wav', s_normal, 48000);
 
 %%
@@ -96,19 +105,25 @@ audiowrite('ex_3b_ii_1.wav', s_normal, 48000);
 
 % Shift base frequency to F2
 z_shifted = shift_freq(z, (F2 - Fbase), Fs);
+figure;
+spectrogram(z_shifted,'yaxis');
+title("z shifted 2");
 z_filtered = filter(b_200, a_200, z_shifted);
 figure;
 spectrogram(z_filtered,'yaxis');
+title("z filtered 2");
 s = fm_demodulate(Fs, z_filtered);
 figure;
 spectrogram(s,'yaxis');
+title("s 2");
 s_filtered = filter(b_16, a_16, s);
 % Reduce from 3.6MHz to 48kHz (every 75th)
 s_reduced = s_filtered(1:75:end);
-% TODO there's aliasing
+% Remove 19kHz spike
+s_reduced = filter(b_n, a_n, s_reduced);
 s_normal = normalize(s_reduced, 'range', [-1 1]);
-figure;
-plot(abs(fft(s_normal)));
+% s_normal = filter(b_n, a_n, s_normal);
+% fft_plot(s_normal, 48000);
 audiowrite('ex_3b_ii_2.wav', s_normal, 48000);
 
 %%
@@ -121,7 +136,13 @@ s = fm_demodulate(Fs, z_filtered);
 s_filtered = filter(b_16, a_16, s);
 % Reduce from 3.6MHz to 48kHz (every 75th)
 s_reduced = s_filtered(1:75:end);
+% Remove 19kHz spike
+s_reduced = filter(b_n, a_n, s_reduced);
 s_normal = normalize(s_reduced, 'range', [-1 1]);
+fft_plot(s_normal, 48000);
+% Remove 19kHz signal
+% s_normal = filter(b_n, a_n, s_normal);
+% fft_plot(s_normal, 48000);
 audiowrite('ex_3b_ii_3.wav', s_normal, 48000);
 
 %% Functions
@@ -140,4 +161,12 @@ end
 function z_prime=shift_freq(z, f, Fs)
     phasor = exp(2*pi*-1i*f*(1:length(z))/Fs);
     z_prime = z .* phasor;
+end
+
+function fft_plot(x, Fs)
+    y = fft(x);
+    % Assume symmetry
+    y_single = abs(y(1:(size(y,2)/2)))*2;
+    figure;
+    plot(linspace(0,Fs/2,size(y_single,2)), y_single);
 end
