@@ -1,19 +1,26 @@
 % test1 = import_png_bw("test1.png");
 % [test1c_y, test1c_Cr, test1c_Cb] = import_png_ycrcb("test1c.png");
 
-evaluate_compression_bw("test1.png") % 0x 
-evaluate_compression_rgb("test1c.png")% 2x
-evaluate_compression_bw("test2.png") % 1x 
-evaluate_compression_rgb("test2c.png") % 2x
-evaluate_compression_bw("test3.png") % 1x
-evaluate_compression_rgb("test3c.png") % 0x
+function assignment4(name,color_type,actual_value)
+    if color_type == "color"
+        c = evaluate_compression_rgb(name);
+    else
+        c = evaluate_compression_bw(name);
+    end
 
-function evaluate_compression_bw(name)
+    if c == actual_value
+        fprintf("%10s:  \t CORRECT \t%d\n", name, c)
+    else
+        fprintf("%10s:  \tINCORRECT\t%d != actual %d\n", name, c, actual_value)
+    end
+end
+
+function c=evaluate_compression_bw(name)
     dat = import_png_bw(name);
     [q_prob, c] = dct_quantization(name,dat);
     fprintf("%10s:  \t%dx compression - p quant = %f\n", name, c, q_prob);
 end
-function evaluate_compression_rgb(name)
+function c=evaluate_compression_rgb(name)
     [Y, Cr, Cb] = import_png_ycrcb(name);
     [q_prob, c] = dct_quantization(name,Y);
     fprintf("%10s Y:\t%dx compression - p quant = %f\n", name, c, q_prob);
