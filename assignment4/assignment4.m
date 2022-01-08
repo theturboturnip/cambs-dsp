@@ -17,13 +17,13 @@ end
 
 function c=evaluate_compression_bw(name)
     dat = import_png_bw(name);
-    [q_prob, c] = dct_quantization(name,dat);
-    fprintf("%10s:  \t%dx compression - p quant = %f\n", name, c, q_prob);
+    [confidence, c] = dct_quantization(name,dat);
+    fprintf("%10s:  \t%dx compression - p confidence = %f\n", name, c, confidence);
 end
 function c=evaluate_compression_rgb(name)
     [Y, Cr, Cb] = import_png_ycrcb(name);
-    [q_prob, c] = dct_quantization(name,Y);
-    fprintf("%10s Y:\t%dx compression - p quant = %f\n", name, c, q_prob);
+    [confidence, c] = dct_quantization(name,Y);
+    fprintf("%10s Y:\t%dx compression - p confidence = %f\n", name, c, confidence);
     % As noted in [Chen2011], Cr and Cb are "coarsely sampled", so their 
     % "periodicity tends to be poorly characterized".
     % Basically, they don't help detect the compression.
@@ -38,7 +38,7 @@ function c=evaluate_compression_rgb(name)
 %     q_prob = dct_quantization(Cb);
 %     fprintf("Cb: p of quant = %f\n", q_prob);
 end
-function [quant_prob,c]=dct_quantization(name,dat)    
+function [confidence,c]=dct_quantization(name,dat)    
     % First step - detect any compression at all
     % Use Neelamani et al. 2006 (https://doi.org/10/bnm5nv) method for
     % color, which refines Fan et al. 2003 (https://doi.org/10/bjrkbd)
@@ -89,46 +89,56 @@ function [quant_prob,c]=dct_quantization(name,dat)
     % Estimate parameter lambda from observations
     lambdas = zeros(8, 8);
     probably_quantized = zeros(8,8);
-%     figure;
+    figure;
+    f = 1;
     for j = 1:8
         for k = 1:8
             
             
             % Experiment - try doubly compressed detection?
-            if j == 3 && k == 2
-%             subplot(8,8,(j-1)*8+k)
-%             plot(abs(fft(histcounts(Di{j,k},'BinMethod','Integer'))))
-                c=evaluate_compression_level(Di{j,k});
+%             if j == 1 && k == 2
+% %             if j == 3 && k == 2
+% %             subplot(8,8,(j-1)*8+k)
+% %             plot(abs(fft(histcounts(Di{j,k},'BinMethod','Integer'))))
+%                 c=evaluate_compression_level(Di{j,k});
+%             end
+            
+            if j < 4 && k < 4 && ~(j == 1 && k == 1) && (j+k<5)
+                subplot(5, 1, f)
+                f = f+1;
+                [c,x] = evaluate_compression_level(Di{j,k});
+%                 plot(abs(fft(histcounts(Di{j,k},'BinMethod','Integer'))))
+                title("AC Term (" + j + "," + k + ") => x = " + x + ", c = " + c)
             end
-            
-            Di{j,k} = abs(Di{j,k});
 
-            
-%             Di{j,k} = unique(Di{j,k});
-            
-            
-            
-            % HACK TIME
-            % If this has been quantized to some level q
-            % as per [Neelamani2006] the histogram of |Di| will have spikes
-            % around n*q
-            % => histogram of uniq(|Di|) will be strings of ones and zeros,
-            % where the first string of ones = the values around Di = 0
-            % and the second string of ones = the values around Di = q
-            % IF we're quantized, these strings should be around 3-4
-            % elements long
-            uniq_di_hist = zeros(1, max(Di{j,k}));%ismember(Di{j,k}, 0:max(Di{j,k}))
-            uniq_di_hist(nonzeros(Di{j,k})) = 1;
-            uniq_di_hist;
-            
-            ls = lengths_of_one_runs(uniq_di_hist);
-            avg_run_length = mean(ls);
-            % BIG hack - assume all runs will be short in a quantized
-            % scenario
-            % Also if the first run is long it's not possible
-            probably_quantized(j,k) = ls(1) < 6 && avg_run_length < 6;
-            
-            lambdas(j,k) = length(Di{j,k})/sum(abs(Di{j,k}));
+%             Di{j,k} = abs(Di{j,k});
+% 
+%             
+% %             Di{j,k} = unique(Di{j,k});
+%             
+%             
+%             
+%             % HACK TIME
+%             % If this has been quantized to some level q
+%             % as per [Neelamani2006] the histogram of |Di| will have spikes
+%             % around n*q
+%             % => histogram of uniq(|Di|) will be strings of ones and zeros,
+%             % where the first string of ones = the values around Di = 0
+%             % and the second string of ones = the values around Di = q
+%             % IF we're quantized, these strings should be around 3-4
+%             % elements long
+%             uniq_di_hist = zeros(1, max(Di{j,k}));%ismember(Di{j,k}, 0:max(Di{j,k}))
+%             uniq_di_hist(nonzeros(Di{j,k})) = 1;
+%             uniq_di_hist;
+%             
+%             ls = lengths_of_one_runs(uniq_di_hist);
+%             avg_run_length = mean(ls);
+%             % BIG hack - assume all runs will be short in a quantized
+%             % scenario
+%             % Also if the first run is long it's not possible
+%             probably_quantized(j,k) = ls(1) < 6 && avg_run_length < 6;
+%             
+%             lambdas(j,k) = length(Di{j,k})/sum(abs(Di{j,k}));
             
 
             % Estimate quantization level q where q = 1-100
@@ -145,8 +155,76 @@ function [quant_prob,c]=dct_quantization(name,dat)
     % https://stackoverflow.com/a/48578831/4248422
     
     quant_prob = mean(probably_quantized, 'all');
+    
+    cs = [
+        evaluate_compression_level(Di{1,2}) ;
+        evaluate_compression_level(Di{1,3}) ;
+        evaluate_compression_level(Di{2,1}) ;
+        evaluate_compression_level(Di{2,2}) ;
+        evaluate_compression_level(Di{3,1}) ;
+    ];
+    c = mode(cs); % This selects the smallest value if bimodal: e.g. [0, 1, 1, 2, 2] => 2
+    confidence = sum(cs == c) / 5;
 end
-function c=evaluate_compression_level(di_3_2_values)
+function [c,x]=evaluate_compression_level(di_1_2_values)
+    % make histogram from abs(di_3_2_values)
+    h = histcounts(abs(di_1_2_values),'BinMethod','Integer');
+    % take fft of it - this will be two-sided, because h is real-valued,
+    % so take only one side
+    y_twosided = abs(fft(h));
+    y = y_twosided;%(ceil(length(h)/2):end);
+
+    % Smoothing
+%     y = filter([1 1 1 1]/4, 1, y);
+%     y = y(4:end);
+
+    % the graphs have three distinct shapes for 0x, 1x, 2x compression
+    % we can differentiate between them using the turning points
+    % Find p
+    [ps, locs] = windowed_peaks(y); %get_turning_points(y);
+    
+    plot(y);
+    hold on;
+    if ~isempty(ps)
+        plot(locs,ps,'r-');
+    end
+    hold off;
+
+    x = std(ps/max(ps));
+    
+    % First, if there aren't many peaks, not compressed
+    if length(ps) < 2
+        c = 0;
+    else
+        % OK, we're compressed, but *how* compressed are we?
+        % As observed in [Chen2011], the peak magnitudes will
+        % be different if compressed 2x
+        % Use standard deviation like [Chen2011] to determine if we're in 1
+        % or 2.
+        
+        % 0.55
+        threshold = 0.075;
+        if x < threshold
+            c = 1;
+        else
+            c = 2;
+        end 
+    end
+end
+function [ps, locs]=windowed_peaks(y) 
+    warning('off', 'signal:findpeaks:largeMinPeakHeight')
+    [ps, locs] = findpeaks(y, "MinPeakHeight", max(y)/5, "MinPeakDistance", 10);
+
+%     if isempty(locs) || locs(1) ~= 1
+%         ps = [y(1) ps];
+%         locs = [1 locs];
+%     end
+%     if isempty(locs) || locs(end) ~= length(y)
+%         ps = [ps y(end)];
+%         locs = [locs length(y)];
+%     end
+end
+function c=evaluate_compression_level_old(di_3_2_values)
     % make histogram from abs(di_3_2_values)
     h = histcounts(abs(di_3_2_values),'BinMethod','Integer');
     % take fft of it - this will be two-sided, because h is real-valued,
@@ -155,6 +233,9 @@ function c=evaluate_compression_level(di_3_2_values)
     % point? would be better to just not do it?
     y_twosided = abs(fft(h));
     y = y_twosided(ceil(length(h)/2):end);
+    % Smooth y - avoid many turning points with noise
+%     y = filter([1 1 1]/3, 1, y);
+
     % the graphs have three distinct shapes for 0x, 1x, 2x compression
     % we can differentiate between them using the turning points
     ps = get_turning_points(y);
@@ -179,7 +260,7 @@ function c=evaluate_compression_level(di_3_2_values)
         s = abs(diff(ps(:,2)));
         % Use standard deviation like [Chen2011] to determine if we're in 1
         % or 2.
-        x = std(s/max(s));
+        x = std(s/max(s))
         
         threshold = 0.1;
         if x < threshold
