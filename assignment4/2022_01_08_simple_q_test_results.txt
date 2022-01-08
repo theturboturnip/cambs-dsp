@@ -1,0 +1,54 @@
+assignment4_train
+./training/converted/test00.png:  	 CORRECT 	2
+./training/converted/test01.png:  	 CORRECT 	1
+./training/converted/test02.png:  	 CORRECT 	2
+./training/converted/test03.png:  	 CORRECT 	0
+./training/converted/test04.png:  	 CORRECT 	1
+./training/converted/test05.png:  	INCORRECT	2 != actual 1
+./training/converted/test06.png:  	 CORRECT 	1
+./training/converted/test07.png:  	 CORRECT 	1
+./training/converted/test08.png:  	 CORRECT 	0
+./training/converted/test09.png:  	 CORRECT 	2
+./training/converted/test10.png:  	 CORRECT 	2
+./training/converted/test11.png:  	 CORRECT 	0
+./training/converted/test12.png:  	 CORRECT 	0
+./training/converted/test13.png:  	INCORRECT	1 != actual 2
+./training/converted/test14.png:  	 CORRECT 	0
+./training/converted/test15.png:  	 CORRECT 	0
+./training/converted/test16.png:  	 CORRECT 	1
+./training/converted/test17.png:  	 CORRECT 	1
+./training/converted/test18.png:  	 CORRECT 	2
+./training/converted/test19.png:  	INCORRECT	1 != actual 2
+./training/converted/test20.png:  	 CORRECT 	0
+./training/converted/test21.png:  	INCORRECT	2 != actual 1
+./training/converted/test22.png:  	 CORRECT 	1
+./training/converted/test23.png:  	 CORRECT 	2
+./training/converted/test24.png:  	 CORRECT 	2
+./training/converted/test25.png:  	INCORRECT	1 != actual 2
+./training/converted/test26.png:  	 CORRECT 	1
+./training/converted/test27.png:  	 CORRECT 	1
+./training/converted/test28.png:  	 CORRECT 	1
+./training/converted/test29.png:  	 CORRECT 	0
+./training/converted/test30.png:  	 CORRECT 	0
+./training/converted/test31.png:  	 CORRECT 	1
+./training/converted/test32.png:  	 CORRECT 	2
+./training/converted/test33.png:  	INCORRECT	2 != actual 1
+./training/converted/test34.png:  	 CORRECT 	0
+./training/converted/test35.png:  	INCORRECT	1 != actual 2
+./training/converted/test36.png:  	 CORRECT 	2
+./training/converted/test37.png:  	 CORRECT 	2
+./training/converted/test38.png:  	 CORRECT 	0
+./training/converted/test39.png:  	 CORRECT 	0
+./training/converted/test40.png:  	 CORRECT 	2
+./training/converted/test41.png:  	INCORRECT	1 != actual 2
+./training/converted/test42.png:  	 CORRECT 	2
+./training/converted/test43.png:  	 CORRECT 	2
+./training/converted/test44.png:  	 CORRECT 	2
+./training/converted/test45.png:  	 CORRECT 	0
+./training/converted/test46.png:  	 CORRECT 	2
+./training/converted/test47.png:  	INCORRECT	1 != actual 2
+9/48
+
+ans =
+
+    0.1875
