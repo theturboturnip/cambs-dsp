@@ -6,6 +6,10 @@ function Di=image_DCT_params(name,color_type)
         dat = import_png_bw(name);
     end
     
+    figure;
+    imshow(dat);
+    title(name);
+    
     bs = blocks_8x8(dat);
     Di = DCT_params(bs);
 end

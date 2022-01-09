@@ -7,7 +7,11 @@ imgs = [
     "test1c.png" "color";
     "test2c.png" "color";
     "test3c.png" "color";
-    "./training/converted/test5.png" "color";
+%     "./training/converted/test04.png" "gray";
+%     "./training/converted/test05.png" "color";
+%     "./training/converted/test33.png" "color";
+%     "./training/converted/test35.png" "color";
+%     "./training/converted/test41.png" "color";
 ];
 imgs_di = {};
 for i_img = 1:size(imgs, 1)
@@ -22,7 +26,8 @@ jk_vals = [
 %     1 3;
 %     2 1;
 %     2 2;
-%     3 1;
+% %     3 1;
+%     3 3;
 %     4 4;
 ];
 figure;
@@ -35,10 +40,25 @@ for i_img = 1:size(imgs, 1)
         subplot(size(imgs, 1), size(jk_vals,1), (i_img-1)*size(jk_vals,1) + i_dct)
         histogram(d, 'BinMethod', 'Integer');
         
+        qs=identify_qs(Di{jk(1), jk(2)}, h);
+        % Plot Q-levels
+%         hold on;
+%         for i_q = 1:length(qs)
+%             q = qs(i_q);
+%             % Find multiples of q within the window [-centre, centre]
+%             % Start from fix(-centre/q) (fix = round-towards-zero)
+%             for n = (0:fix(length(h)/q))
+%                 xline(n*q, q_colors(i_q));
+%             end
+%         end
+%         hold off;
+        
         h_sort = sort(unique(h));
 %         ylim([0, h_sort(5)*5]);
         ylim([0, h_sort(end-5)]);
-        title(imgs(i_img) + " - DCT{ " + jk(1) + "," + jk(2) + " }");
+        title([imgs(i_img) + " - DCT{ " + jk(1) + "," + jk(2) + " }"
+            "qs = [" + strjoin(string(qs), ", ") + "]"
+        ]);
     end
 end
 
@@ -106,12 +126,12 @@ for i_img = 1:size(imgs, 1)
 %             end
 %         end
         
-        qs=identify_qs(h)
+        qs_fft_est=estimate_fft_qs(h)
         
         % Plot Q-levels
         hold on;
-        for i_q = 1:length(qs)
-            q = qs(i_q);
+        for i_q = 1:length(qs_fft_est)
+            q = qs_fft_est(i_q);
             % Find multiples of q within the window [-centre, centre]
             % Start from fix(-centre/q) (fix = round-towards-zero)
             for n = fix(-centre/q):fix(centre/q)
@@ -122,7 +142,7 @@ for i_img = 1:size(imgs, 1)
         
         t = [
             imgs(i_img) + " - FFT of DCT{ " + jk(1) + "," + jk(2) + " }";
-            "qs = [" + strjoin(string(qs), ", ") + "]"
+            "qs_fft_est = [" + strjoin(string(qs_fft_est), ", ") + "]"
         ];
         title(t);
 %         subtitle("qs = " + strjoin(string(qs), ", "));
