@@ -5,39 +5,51 @@ function Di=image_DCT_params(name,color_type)
     else
         dat = import_png_bw(name);
     end
-    
-    figure;
-    imshow(dat);
-    title(name);
+%     
+%     figure;
+%     imshow(dat);
+%     title(name);
     
     bs = blocks_8x8(dat);
     Di = DCT_params(bs);
 end
 
 function Di=DCT_params(bs)
-    Di = cell(8, 8); % Di = 8x8 cell array, each cell = 1xlength(filtered_bs) vector
+    % Di = 8x8 cell array, each cell = 1xlength(bs) vector
+    Di = cell(8, 8);
+    % Preallocate enough memory for all blocks on each coefficient
     for j = 1:8
         for k = 1:8
             Di{j,k} = zeros(1, length(bs));
         end
     end
+    % Count the number of DCTs we actually compute
+    n_dcts = 1;
     for i = 1:length(bs)
         b = bs{i};
-        d = round(dct2(b));
-        % For unsigned 8-bit input, DCT coefficients are signed 11-bit ints
         
-        % TODO - do 2003 filtering here?
-%         if ismember(255, b) || ismember(0, b) || length(unique(b)) == 1
-%             % This block is potentially-truncated, or uniform
-%             % => DCT could throw off results
-%         else
+        % Do Fan2003 filtering here
+        if ismember(255, b) || ismember(0, b) || length(unique(b)) == 1
+            % This block is potentially-truncated, or uniform
+            % => DCT could throw off results, don't do it
+        else
+            % Perform a DCT
+            % For unsigned 8-bit input, DCT coefficients are signed 11-bit ints
+            % => it's OK to round them
+            d = round(dct2(b));
             for j = 1:8
                 for k = 1:8
-                    % TODO
-                    Di{j,k}(i) = d(j,k);
+                    Di{j,k}(n_dcts) = d(j,k);
                 end
             end
-%         end
+            n_dcts = n_dcts + 1;
+        end
+    end
+    % Shrink the individual cell vectors to only the DCTs we calculated
+    for j = 1:8
+        for k = 1:8
+            Di{j,k} = Di{j,k}(1:(n_dcts-1));
+        end
     end
 end
 function bs=blocks_8x8(dat)

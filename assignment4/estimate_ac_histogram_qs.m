@@ -1,14 +1,12 @@
-function qs_est = estimate_fft_qs(h)
-    y = abs(fft(h))./length(h);
-    % Recentre on zero
-    y = fftshift(y);
-    centre = floor(length(y)/2);
+function qs_est = estimate_ac_histogram_qs(h)
+    y = h;
+%     centre = floor(length(y)/2);
 
     % Use max(length(y)/50, 1) as minpeakdistance - for the ys of length
     % ~2000, 20 is great, but for smaller ys (and potentially AC terms)
     % don't want to be that limiting
-    [ps, locs] = findpeaks(y, "MinPeakHeight", max(y)/10, "MinPeakDistance", max(length(y)/100, 1));
-    centred_locs = locs-centre-1;
+    [ps, locs] = findpeaks(y, "MinPeakHeight", max(y)/10);
+    centred_locs = locs-1;
 
     % Identify quantization
     if length(ps) <= 1
@@ -18,7 +16,10 @@ function qs_est = estimate_fft_qs(h)
     else
         % Assume odd amount of peaks (centre + even amounts on both
         % sides)
-        first_peak_after_centre = ceil(length(ps)/2)+1;
+        first_peak_after_centre = 1;
+        if centred_locs(1) == 0
+            first_peak_after_centre = 2;
+        end
         % Must at least be periodic in first peak
         qs_est = [ centred_locs(first_peak_after_centre) ];
 

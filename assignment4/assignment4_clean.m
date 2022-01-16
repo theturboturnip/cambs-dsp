@@ -1,17 +1,20 @@
 
 
 imgs = [
-    "test1.png" "gray";
-    "test2.png" "gray";
-    "test3.png" "gray";
-    "test1c.png" "color";
-    "test2c.png" "color";
-    "test3c.png" "color";
-%     "./training/converted/test04.png" "gray";
-%     "./training/converted/test05.png" "color";
-%     "./training/converted/test33.png" "color";
-%     "./training/converted/test35.png" "color";
-%     "./training/converted/test41.png" "color";
+%     "test1.png" "gray";
+%     "test2.png" "gray";
+%     "test3.png" "gray";
+%     "test1c.png" "color";
+%     "test2c.png" "color";
+%     "test3c.png" "color";
+
+
+    "./training/converted/test08.png" "gray"; % 0x
+    "./training/converted/test06.png" "gray"; % 1x
+    "./training/converted/test02.png" "gray"; % 2x
+    "./training/converted/test11.png" "color"; % 0x
+    "./training/converted/test17.png" "color"; % 1x
+    "./training/converted/test13.png" "color"; % 2x
 ];
 imgs_di = {};
 for i_img = 1:size(imgs, 1)
@@ -22,11 +25,11 @@ end
 %% Display data
 jk_vals = [
     1 1;
-%     1 2;
-%     1 3;
-%     2 1;
-%     2 2;
-% %     3 1;
+    1 2;
+    1 3;
+    2 1;
+    2 2;
+    3 1;
 %     3 3;
 %     4 4;
 ];
@@ -40,7 +43,11 @@ for i_img = 1:size(imgs, 1)
         subplot(size(imgs, 1), size(jk_vals,1), (i_img-1)*size(jk_vals,1) + i_dct)
         histogram(d, 'BinMethod', 'Integer');
         
-        qs=identify_qs(Di{jk(1), jk(2)}, h);
+        if jk == [1 1]
+            qs=identify_qs("dc", Di{jk(1), jk(2)});
+        else
+            qs=identify_qs("ac", Di{jk(1), jk(2)});
+        end
         % Plot Q-levels
 %         hold on;
 %         for i_q = 1:length(qs)
@@ -63,6 +70,15 @@ for i_img = 1:size(imgs, 1)
 end
 
 %% FFT data
+jk_vals = [
+    1 1;
+%     1 2;
+%     1 3;
+%     2 1;
+%     3 1;
+%     2 2;
+];
+
 q_colors = ['m' 'r'];
 
 figure;
@@ -82,7 +98,7 @@ for i_img = 1:size(imgs, 1)
         plot(centre-(0:(length(y)-1)), y);
         
         hold on;
-        [ps, locs] = findpeaks(y, "MinPeakHeight", max(y)/10, "MinPeakDistance", 20);
+        [ps, locs] = findpeaks(y, "MinPeakHeight", max(y)/15, "MinPeakDistance", max(length(y)/100, 1));
         centred_locs = locs-centre-1;
         plot(centred_locs, ps, 'r*');
         hold off;
@@ -126,7 +142,7 @@ for i_img = 1:size(imgs, 1)
 %             end
 %         end
         
-        qs_fft_est=estimate_fft_qs(h)
+        qs_fft_est=estimate_dc_fft_qs(h)
         
         % Plot Q-levels
         hold on;
@@ -142,7 +158,76 @@ for i_img = 1:size(imgs, 1)
         
         t = [
             imgs(i_img) + " - FFT of DCT{ " + jk(1) + "," + jk(2) + " }";
-            "qs_fft_est = [" + strjoin(string(qs_fft_est), ", ") + "]"
+            "qs\_fft\_est = [" + strjoin(string(qs_fft_est), ", ") + "]"
+        ];
+        title(t);
+%         subtitle("qs = " + strjoin(string(qs), ", "));
+    end
+end
+
+%% AC Hist Data
+jk_vals = [
+    1 1;
+    1 2;
+    1 3;
+    2 1;
+    2 2;
+    3 1;
+%     3 3;
+%     4 4;
+];
+
+q_colors = ['m' 'r'];
+
+figure;
+for i_img = 1:size(imgs, 1)
+    Di = imgs_di{i_img};
+    for i_dct = 1:size(jk_vals,1)
+        jk = jk_vals(i_dct, :);
+        d = Di{jk(1), jk(2)};
+        h = histcounts(abs(d),'BinMethod','Integer');
+        subplot(size(imgs, 1), size(jk_vals,1), (i_img-1)*size(jk_vals,1) + i_dct)
+
+% %         h = h - mean(h);
+%         y = abs(fft(h))./length(h);
+%         % Recentre on zero
+%         y = fftshift(y);
+% %         y = abs(fft(y))./length(y);
+% %         % Recentre on zero
+% %         y = fftshift(y);
+% %         y = h;
+%         % Recentre on zero
+% %         histogram(abs(d), 'BinMethod', 'Integer');
+%         plot(y);
+        
+        periodogram(h);
+%         hold on;
+%         [ps, locs] = findpeaks(y, "MinPeakHeight", max(y)/10);
+%         centred_locs = locs - 1;
+%         plot(centred_locs-0.5, ps, 'r*');
+%         hold off;
+        
+%         xlim([0, length(y)-1]);
+        
+        hold on;
+        
+%         qs_est=identify_qs("ac", d)%estimate_ac_histogram_qs(h)
+        
+        % Plot Q-levels
+%         hold on;
+%         for i_q = 1:length(qs_est)
+%             q = qs_est(i_q);
+%             % Find multiples of q within the window [-centre, centre]
+%             % Start from fix(-centre/q) (fix = round-towards-zero)
+%             for n = 0:fix(length(y)/q)
+%                 xline(n*q, q_colors(i_q));
+%             end
+%         end
+        hold off;
+        
+        t = [
+            imgs(i_img) + " - FFT FFT DCT{ " + jk(1) + "," + jk(2) + " }";
+%             "qs\_est = [" + strjoin(string(qs_est), ", ") + "]"
         ];
         title(t);
 %         subtitle("qs = " + strjoin(string(qs), ", "));
