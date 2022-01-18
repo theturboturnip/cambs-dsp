@@ -25,7 +25,7 @@ end
 % Histogram of DC component
 figure;
 jk_vals = [
-    1 1;
+    1 2;
 ];
 for i_img = 1:size(imgs, 1)
     Di = imgs_di{i_img};
@@ -39,7 +39,7 @@ for i_img = 1:size(imgs, 1)
         
 %         h_sort = sort(unique(h));
 %         ylim([0, h_sort(end-5)]);
-        xlim([0 2000]);
+        xlim([-50 50]);
 %         title(imgs(i_img));% + " - DCT{ " + jk(1) + "," + jk(2) + " }"]);
     end
 end

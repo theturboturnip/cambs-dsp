@@ -38,6 +38,17 @@ h_q_5_q_10 = histcounts(abs(x_q_5_q_10),'BinMethod','Integer');
 x_q_10 = 10 * floor(x ./ 10);
 h_q_10 = histcounts(abs(x_q_10),'BinMethod','Integer');
 
+figure;
+histogram(abs(x),'BinMethod','Integer');
+set(gca,'YTickLabel',[]);
+set(gca,'XTickLabel',[]);
+xlim([300 600]);
+
+figure;
+histogram(abs(x_q_5),'BinMethod','Integer');
+set(gca,'YTickLabel',[]);
+set(gca,'XTickLabel',[]);
+xlim([300 600]);
 
 figure('Name', 'B(f)');
 y = abs(fft(h));
