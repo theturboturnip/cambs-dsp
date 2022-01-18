@@ -6,14 +6,6 @@ imgs = [
     "test2c.png" "color";
     "test3.png" "gray";
     "test3c.png" "color";
-
-
-%     "./training/converted/test08.png" "gray"; % 0x
-%     "./training/converted/test06.png" "gray"; % 1x
-%     "./training/converted/test02.png" "gray"; % 2x
-%     "./training/converted/test11.png" "color"; % 0x
-%     "./training/converted/test17.png" "color"; % 1x
-%     "./training/converted/test13.png" "color"; % 2x
 ];
 img_names = [
     "Test 1",
@@ -227,9 +219,6 @@ for i_img = 1:size(imgs_ex, 1)
 
 
         plot(centre-(0:(length(y)-1)), y,'LineWidth',2);
-%         for i_p = 1:length(ps)
-%             xline(locs(i_p)-centre-1, 'r');
-%         end
         stem(locs-centre-1, ps, 'r');
 
         for l = img_lines{i_img}
@@ -241,29 +230,13 @@ for i_img = 1:size(imgs_ex, 1)
             end
         end
         
-%         plot(locs-centre-1, ps, 'r*');
         hold off;
         
         if jk(1) == 1 && jk(2) == 1
             xlim([-50 850]);
         end
         
-%         AxesH = axes('Parent', FigH, ...
-%           'Units', 'normalized', ...
-%           'Position', [0, 0, 1, 1], ...
-%           'Visible', 'off', ...
-%           'XLim', [0, 1], ...
-%           'YLim', [0, 1], ...
-%           'NextPlot', 'add');
-%         TextH = text(0,1, 'Top left', ...
-%           'HorizontalAlignment', 'left', ...
-%           'VerticalAlignment', 'top');
-%         annotation(FigH, 'textbox', [0 1 0 0], 'String', 'YourString', 'FitBoxToText', true);
         xL=xlim;
         yL=ylim;
-%         text(xL(2),yL(2), ...
-%             img_names(i_img) + " - DCT{ " + jk(1) + "," + jk(2) + " }", ...
-%             'HorizontalAlignment','right','VerticalAlignment','top')
-%         title([img_names(i_img) + " - DCT{ " + jk(1) + "," + jk(2) + " }"]);
     end
 end

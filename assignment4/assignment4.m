@@ -1,7 +1,6 @@
 function assignment4(name, color_type, expected_value)
     qs = evaluate_compression(name, color_type);
 
-%     fprintf("%10s: \t%d\t", name, length(qs));
     fprintf("%d,\t%s,\t%s,\t", length(qs), color_type, name)
     if length(qs) == expected_value
         fprintf("CORRECT,\t")
