@@ -15,6 +15,14 @@ imgs = [
 %     "./training/converted/test17.png" "color"; % 1x
 %     "./training/converted/test13.png" "color"; % 2x
 ];
+img_names = [
+    "Test 1",
+    "Test 1C",
+    "Test 2",
+    "Test 2C",
+    "Test 3",
+    "Test 3C",
+];
 imgs_di = {};
 for i_img = 1:size(imgs, 1)
     Di = image_DCT_params(imgs(i_img,1), imgs(i_img, 2));
@@ -117,24 +125,73 @@ for i_img = 1:size(imgs, 1)
 end
 sgtitle("FFT of Histogram of DC component of DCT - Manually Annotated");
 
-%% Figure 4
+%% Figure 
+% Peaks identified for DCT FFT
+figure;
+jk_vals = [
+    1 1;
+    1 2;
+];
+for i_img = 1:size(imgs, 1)
+    Di = imgs_di{i_img};
+    for i_dct = 1:size(jk_vals,1)
+        jk = jk_vals(i_dct, :);
+        d = Di{jk(1), jk(2)};
+        h = histcounts(abs(d),'BinMethod','Integer');
+        FigH = subplot(size(imgs, 1), size(jk_vals,1), (i_img-1)*size(jk_vals,1) + i_dct)
+
+        y = abs(fft(h))./length(h);
+        % Recentre on zero
+        y = fftshift(y);
+        centre = floor(length(y)/2);
+
+        hold on;
+        [ps,locs,~] = estimate_dc_fft_qs(h);
+
+
+        plot(centre-(0:(length(y)-1)), y,'LineWidth',2);
+%         for i_p = 1:length(ps)
+%             xline(locs(i_p)-centre-1, 'r');
+%         end
+        stem(locs-centre-1, ps, 'r');
+
+
+        
+%         plot(locs-centre-1, ps, 'r*');
+        hold off;
+        
+        if jk(1) == 1 && jk(2) == 1
+            xlim([-100 1000]);
+        end
+        
+%         AxesH = axes('Parent', FigH, ...
+%           'Units', 'normalized', ...
+%           'Position', [0, 0, 1, 1], ...
+%           'Visible', 'off', ...
+%           'XLim', [0, 1], ...
+%           'YLim', [0, 1], ...
+%           'NextPlot', 'add');
+%         TextH = text(0,1, 'Top left', ...
+%           'HorizontalAlignment', 'left', ...
+%           'VerticalAlignment', 'top');
+%         annotation(FigH, 'textbox', [0 1 0 0], 'String', 'YourString', 'FitBoxToText', true);
+        xL=xlim;
+        yL=ylim;
+%         text(xL(2),yL(2), ...
+%             img_names(i_img) + " - DCT{ " + jk(1) + "," + jk(2) + " }", ...
+%             'HorizontalAlignment','right','VerticalAlignment','top')
+%         title([img_names(i_img) + " - DCT{ " + jk(1) + "," + jk(2) + " }"]);
+    end
+end
+% sgtitle("FFT Peaks");
+
+
+%% Figure Extra
 imgs_ex = [
-
-
-    "./training/converted/test08.png" "gray"; % 0x
-    "./training/converted/test38.png" "gray"; % 0x
-    "./training/converted/test11.png" "color"; % 0x
-    "./training/converted/test29.png" "color"; % 0x
-
-    "./training/converted/test06.png" "gray"; % 1x
-    "./training/converted/test26.png" "gray"; % 1x
-    "./training/converted/test33.png" "color"; % 1x
-    "./training/converted/test17.png" "color"; % 1x
-    
-    "./training/converted/test02.png" "gray"; % 2x
-    "./training/converted/test24.png" "gray"; % 2x
-    "./training/converted/test35.png" "color"; % 2x
-    "./training/converted/test37.png" "color"; % 2x
+    "./training/converted/test00.png" "gray";
+    "./training/converted/test10.png" "gray";
+    "./training/converted/test13.png" "color";
+    "./training/converted/test35.png" "color";
 ];
 imgs_ex_di = {};
 for i_img = 1:size(imgs_ex, 1)
@@ -145,56 +202,68 @@ end
 figure;
 jk_vals = [
     1 1;
-    2 2;
-    1 2;
-    1 3;
-    2 1;
-    3 1;
 ];
+img_lines = {
+    [57, 170, 595];
+    [64 192];
+    [322];
+    [293 327];
+};
 for i_img = 1:size(imgs_ex, 1)
     Di = imgs_ex_di{i_img};
     for i_dct = 1:size(jk_vals,1)
         jk = jk_vals(i_dct, :);
         d = Di{jk(1), jk(2)};
         h = histcounts(abs(d),'BinMethod','Integer');
-        subplot(size(imgs_ex, 1), size(jk_vals,1), (i_img-1)*size(jk_vals,1) + i_dct)
+        FigH = subplot(size(imgs_ex, 1), size(jk_vals,1), (i_img-1)*size(jk_vals,1) + i_dct)
 
-        histogram(d, 'BinMethod', 'Integer');
-        
-%         h_sort = sort(unique(h));
-%         ylim([0, h_sort(end-5)]);
-%         xlim([0 2000]);
-        title(imgs_ex(i_img));% + " - DCT{ " + jk(1) + "," + jk(2) + " }"]);
-    end
-end
-sgtitle("Histogram of DC component of DCT");
-
-figure;
-jk_vals = [
-    1 1;
-    2 2;
-    1 2;
-    1 3;
-    2 1;
-    3 1;
-];
-for i_img = 1:size(imgs_ex, 1)
-    Di = imgs_ex_di{i_img};
-    for i_dct = 1:size(jk_vals,1)
-        jk = jk_vals(i_dct, :);
-        d = Di{jk(1), jk(2)};
-        h = histcounts(abs(d),'BinMethod','Integer');
-        subplot(size(imgs_ex, 1), size(jk_vals,1), (i_img-1)*size(jk_vals,1) + i_dct)
-
-        y = abs(fft(h));
+        y = abs(fft(h))./length(h);
+        % Recentre on zero
         y = fftshift(y);
         centre = floor(length(y)/2);
-        plot(centre-(0:(length(y)-1)), y);
-%         xlim([0 1000]);
+
+        hold on;
+        [ps,locs,~] = estimate_dc_fft_qs(h);
+
+
+        plot(centre-(0:(length(y)-1)), y,'LineWidth',2);
+%         for i_p = 1:length(ps)
+%             xline(locs(i_p)-centre-1, 'r');
+%         end
+        stem(locs-centre-1, ps, 'r');
+
+        for l = img_lines{i_img}
+            xline(l, '--');
+            if i_img == 4 && l < 300
+                text(l, max(y), l + " ", 'HorizontalAlignment', 'right', 'VerticalAlignment', 'top')
+            else
+                text(l, max(y), " "+l, 'HorizontalAlignment', 'left', 'VerticalAlignment', 'top')
+            end
+        end
         
-%         h_sort = sort(unique(h));
-%         ylim([0, h_sort(end-5)]);
-        title(imgs_ex(i_img, 1));% + " - DCT{ " + jk(1) + "," + jk(2) + " }"]);
+%         plot(locs-centre-1, ps, 'r*');
+        hold off;
+        
+        if jk(1) == 1 && jk(2) == 1
+            xlim([-50 850]);
+        end
+        
+%         AxesH = axes('Parent', FigH, ...
+%           'Units', 'normalized', ...
+%           'Position', [0, 0, 1, 1], ...
+%           'Visible', 'off', ...
+%           'XLim', [0, 1], ...
+%           'YLim', [0, 1], ...
+%           'NextPlot', 'add');
+%         TextH = text(0,1, 'Top left', ...
+%           'HorizontalAlignment', 'left', ...
+%           'VerticalAlignment', 'top');
+%         annotation(FigH, 'textbox', [0 1 0 0], 'String', 'YourString', 'FitBoxToText', true);
+        xL=xlim;
+        yL=ylim;
+%         text(xL(2),yL(2), ...
+%             img_names(i_img) + " - DCT{ " + jk(1) + "," + jk(2) + " }", ...
+%             'HorizontalAlignment','right','VerticalAlignment','top')
+%         title([img_names(i_img) + " - DCT{ " + jk(1) + "," + jk(2) + " }"]);
     end
 end
-sgtitle("FFT of Histogram of DC component of DCT");

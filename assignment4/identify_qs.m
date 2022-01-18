@@ -1,7 +1,7 @@
 function qs = identify_qs(type, d, h)
     if type == "dc"
         h = histcounts(abs(d),'BinMethod','Integer');
-        peaks_fft = estimate_dc_fft_qs(h);
+        [~,~,qs] = estimate_dc_fft_qs(h);
         % Imagine a dirac comb with period T, sampled between T = [0, 1].
         % The FFT of that sample will have a period F = 1/T
         % *If* the histogram values were sampled between T = {0, 1}, 
@@ -10,82 +10,74 @@ function qs = identify_qs(type, d, h)
         % length(h)}
         % => T = length(h)
         % e.g. length(h)/qs_fft_est
-        period = (length(h)./peaks_fft);
-        period = round(period);
-        if ~isempty(period)
-            period = unique(period);
-        end
 
-        if length(period) == 2
-            % Determine the order of quantizations
-            period = [min(period) max(period)];
-
-            % If period(2) is a factor of period(1)
-            ratio = period(2) / period(1);
-            if abs(ratio - round(ratio)) < 0.1
-                % Then period(2) is likely the first point where the first and second
-                % quantization levels overlapped, rather than being the
-                % actual second quantization level.
-                % e.g. for period = [10, 40]
-                % Given that there were values at each multiple of 10
-                % (because we picked it up in the first place) and not just
-                % multiples of 40, this data can't have been quantized with
-                % q=40.
-                % Instead, it's much more likely that it was quantized with
-                % q=8 and q=10. This would leave small peaks at
-                % e.g. 10, 20, 30 (which are all close to multiples of 8,
-                % but not exact) and large peaks at 40 (which is a multiple
-                % of both 10 and 8).
-
-                % Now given [10, 40], we want to find 8.
-                % This has to be a number that's
-                % a) a divisor of 40
-                % b) not a multiple of 10
-                % c) not a divisor of 10
-                % The numbers that fulfil these conditions for [10, 40] are
-                % 4 and 8.
-                % If 4 were the correct value, then there would be a larger
-                % spike at 20, which would have been picked up instead of
-                % 40.
-                % => also remove divisors of 10*2, 10*3
-                divs = divisors(period(2)); % = divisors of 40
-                divs = setdiff(divs, divisors(period(1))); % remove divisors of 10
-                divs = setdiff(divs, (1:ratio) .* period(1)); % remove multiples of 10
-                % For all multiples of 10, up to and not including 40,
-                % remove *those* divisors.
-                for mult = (1:(ratio-1)) .* period(1)
-                    divs = setdiff(divs, divisors(mult));
-                end
-
-                if length(divs) == 1
-                    qs = [divs(1) period(1)];
-                elseif length(divs) > 1
-                    qs = [choose_best_q(divs, d) period(1)];
-                else
-                    error("period %d is a multiple of period %d, but couldn't find a suitable quantization", period(2), period(1));
-                end
-          
-            else
-                qs = period;
-            end
-        else
-            qs = period;
-        end
+        
+%         if ~isempty(period)
+%             period = unique(period);
+%         end
+% 
+%         if length(period) == 2
+%             % Determine the order of quantizations
+%             period = [min(period) max(period)];
+% 
+%             % If period(2) is a factor of period(1)
+%             ratio = period(2) / period(1);
+%             if abs(ratio - round(ratio)) < 0.1
+%                 % Then period(2) is likely the first point where the first and second
+%                 % quantization levels overlapped, rather than being the
+%                 % actual second quantization level.
+%                 % e.g. for period = [10, 40]
+%                 % Given that there were values at each multiple of 10
+%                 % (because we picked it up in the first place) and not just
+%                 % multiples of 40, this data can't have been quantized with
+%                 % q=40.
+%                 % Instead, it's much more likely that it was quantized with
+%                 % q=8 and q=10. This would leave small peaks at
+%                 % e.g. 10, 20, 30 (which are all close to multiples of 8,
+%                 % but not exact) and large peaks at 40 (which is a multiple
+%                 % of both 10 and 8).
+% 
+%                 % Now given [10, 40], we want to find 8.
+%                 % This has to be a number that's
+%                 % a) a divisor of 40
+%                 % b) not a multiple of 10
+%                 % c) not a divisor of 10
+%                 % The numbers that fulfil these conditions for [10, 40] are
+%                 % 4 and 8.
+%                 % If 4 were the correct value, then there would be a larger
+%                 % spike at 20, which would have been picked up instead of
+%                 % 40.
+%                 % => also remove divisors of 10*2, 10*3
+%                 divs = divisors(period(2)); % = divisors of 40
+%                 divs = setdiff(divs, divisors(period(1))); % remove divisors of 10
+%                 divs = setdiff(divs, (1:ratio) .* period(1)); % remove multiples of 10
+%                 % For all multiples of 10, up to and not including 40,
+%                 % remove *those* divisors.
+%                 for mult = (1:(ratio-1)) .* period(1)
+%                     divs = setdiff(divs, divisors(mult));
+%                 end
+% 
+%                 if length(divs) == 1
+%                     qs = [divs(1) period(1)];
+%                 elseif length(divs) > 1
+%                     qs = [choose_best_q(divs, d) period(1)];
+%                 else
+%                     error("period %d is a multiple of period %d, but couldn't find a suitable quantization", period(2), period(1));
+%                 end
+%           
+%             else
+%                 qs = period;
+%             end
+%         else
+%             qs = period;
+%         end
 
 
         % Refinement doesn't help here - the Neelamani approach 
         % assumes the 0th peak is highest, and the rest get continually
         % lower as modelled by a laplacian distribution
     elseif type == "ac"
-        h = histcounts(abs(d),'BinMethod','Integer');
-        qs_est = estimate_ac_histogram_qs(h)
-        REFINE_ESTIMATE = 1;
-        
-        if ~REFINE_ESTIMATE || isempty(qs_est)
-            qs = qs_est;
-        else
-            qs = refine_qs(qs_est, d);
-        end
+        error("'ac' mode not supported - use 'dc' mode instead");
     end
 end
 function qs=refine_qs(qs_est, d)
@@ -183,8 +175,6 @@ function q=choose_best_q(qs_poss, d)
     % Get the index of the maximum score (= the index of the q with the maximum score)
     [s_max, i_q_max] = max(log_scores);
     q = qs_poss(i_q_max);
-
-    qs_poss, q
 end
 function p=roundoff_gauss_p_eq_6(gamma, expected_err)
     if abs(expected_err) > gamma

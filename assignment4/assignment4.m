@@ -1,16 +1,17 @@
 function assignment4(name, color_type, expected_value)
     qs = evaluate_compression(name, color_type);
 
-    fprintf("%10s: \t%d\t", name, length(qs));
+%     fprintf("%10s: \t%d\t", name, length(qs));
+    fprintf("%d,\t%s,\t%s,\t", length(qs), color_type, name)
     if length(qs) == expected_value
-        fprintf(" CORRECT \t    \t")
+        fprintf("CORRECT,\t")
     else
-        fprintf("INCORRECT\t(%d)\t", expected_value)
+        fprintf("INCORRECT(%d),\t", expected_value)
     end
     for q = qs
-        qual_min = estimate_qual_from_q(q + 0.5);
-        qual_max = estimate_qual_from_q(q - 0.5);
-        fprintf("%3d-%-3d\t", qual_min, qual_max);
+        qual_min = estimate_qual_from_q(q + 1);
+        qual_max = estimate_qual_from_q(q);
+        fprintf("%d,\t%3d-%-3d,\t", q, qual_min, qual_max);
     end
     fprintf("\n")
 end
